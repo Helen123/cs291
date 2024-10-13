@@ -1,28 +1,39 @@
 require File.expand_path(File.dirname(__FILE__) + '/neo')
 
-# Project: Create a Proxy Class
-#
-# In this assignment, create a proxy class (one is started for you
-# below).  You should be able to initialize the proxy object with any
-# object.  Any messages sent to the proxy object should be forwarded
-# to the target object.  As each message is sent, the proxy should
-# record the name of the method sent.
-#
-# The proxy class is started for you.  You will need to add a method
-# missing handler and any other supporting methods.  The specification
-# of the Proxy class is given in the AboutProxyObjectProject koan.
-
+# Proxy Class that forwards messages to the target object and records them
 class Proxy
   def initialize(target_object)
     @object = target_object
-    # ADD MORE CODE HERE
+    @messages = []
   end
 
-  # WRITE CODE HERE
+  def messages
+    @messages
+  end
+
+  def method_missing(method_name, *args, &block)
+    if @object.respond_to?(method_name)
+      @messages << method_name
+      @object.send(method_name, *args, &block)
+    else
+      super
+    end
+  end
+
+  def respond_to_missing?(method_name, include_private = false)
+    @object.respond_to?(method_name) || super
+  end
+
+  def called?(method_name)
+    @messages.include?(method_name)
+  end
+
+  def number_of_times_called(method_name)
+    @messages.count(method_name)
+  end
 end
 
-# The proxy object should pass the following Koan:
-#
+# The proxy object should pass the following Koans:
 class AboutProxyObjectProject < Neo::Koan
   def test_proxy_method_returns_wrapped_object
     # NOTE: The Television class is defined below
@@ -67,7 +78,7 @@ class AboutProxyObjectProject < Neo::Koan
     tv.power
 
     assert tv.called?(:power)
-    assert ! tv.called?(:channel)
+    assert !tv.called?(:channel)
   end
 
   def test_proxy_counts_method_calls
@@ -93,7 +104,6 @@ class AboutProxyObjectProject < Neo::Koan
   end
 end
 
-
 # ====================================================================
 # The following code is to support the testing of the Proxy class.  No
 # changes should be necessary to anything below this comment.
@@ -115,7 +125,7 @@ class Television
   end
 end
 
-# Tests for the Television class.  All of theses tests should pass.
+# Tests for the Television class.  All of these tests should pass.
 class TelevisionTest < Neo::Koan
   def test_it_turns_on
     tv = Television.new
@@ -130,7 +140,7 @@ class TelevisionTest < Neo::Koan
     tv.power
     tv.power
 
-    assert ! tv.on?
+    assert !tv.on?
   end
 
   def test_edge_case_on_off
@@ -144,7 +154,7 @@ class TelevisionTest < Neo::Koan
 
     tv.power
 
-    assert ! tv.on?
+    assert !tv.on?
   end
 
   def test_can_set_the_channel
@@ -154,3 +164,4 @@ class TelevisionTest < Neo::Koan
     assert_equal 11, tv.channel
   end
 end
+
