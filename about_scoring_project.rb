@@ -17,7 +17,6 @@ require File.expand_path(File.dirname(__FILE__) + '/neo')
 #
 # * Everything else is worth 0 points.
 #
-#
 # Examples:
 #
 # score([1,1,1,5,1]) => 1150 points
@@ -25,12 +24,36 @@ require File.expand_path(File.dirname(__FILE__) + '/neo')
 # score([3,4,5,3,3]) => 350 points
 # score([1,5,1,2,4]) => 250 points
 #
-# More scoring examples are given in the tests below:
-#
 # Your goal is to write the score method.
 
 def score(dice)
-  # You need to write this method
+  return 0 if dice.empty?
+
+  points = 0
+  counts = Hash.new(0)
+
+  # Count occurrences of each dice roll
+  dice.each do |die|
+    counts[die] += 1
+  end
+
+  # Score sets of three
+  counts.each do |num, count|
+    if count >= 3
+      if num == 1
+        points += 1000
+      else
+        points += num * 100
+      end
+      counts[num] -= 3
+    end
+  end
+
+  # Score remaining 1s and 5s
+  points += counts[1] * 100
+  points += counts[5] * 50
+
+  points
 end
 
 class AboutScoringProject < Neo::Koan
@@ -73,5 +96,5 @@ class AboutScoringProject < Neo::Koan
     assert_equal 1200, score([1,1,1,1,1])
     assert_equal 1150, score([1,1,1,5,1])
   end
-
 end
+
